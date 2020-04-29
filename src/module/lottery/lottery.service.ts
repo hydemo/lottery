@@ -175,7 +175,7 @@ export class LotteryService {
     if (!lottery) {
       throw new ApiException('奖券不存在', ApiErrorCode.NO_EXIST, 404);
     }
-    if (String(lottery.user) !== user) {
+    if (String(lottery.user) !== String(user)) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.lotteryModel.findByIdAndUpdate(id, {
