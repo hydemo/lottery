@@ -1,0 +1,15 @@
+- script: ./dist/main.js
+  name: integral
+  interpreter: node
+  interpreter_args: -r tsconfig-paths/register
+  cwd: ./
+  exec_mode: cluster_mode
+  instances: max
+  watch_options:
+    followSymlinks: false
+  error_file: ./log/integral-error.log
+  out_file: ./log/integral-out.log
+  pid_file: ./log/integral-piZd.log
+  log_date_format: YYYY-MM-DD HH:mm:ss
+  env:
+    NODE_ENV: production
