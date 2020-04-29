@@ -41,15 +41,16 @@ export class ApiLotteryController {
   })
   @ApiOperation({ title: '判断是否抽过奖', description: '判断是否抽过奖' })
   async check(@Request() req: any): Promise<any> {
-    if (!req.user.signTime) {
-      return true;
-    }
-    const now = moment().format('YYYY-MM-DD');
-    const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
-    if (now === lotteryTime) {
-      return false;
-    }
     return true;
+    // if (!req.user.signTime) {
+    //   return true;
+    // }
+    // const now = moment().format('YYYY-MM-DD');
+    // const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
+    // if (now === lotteryTime) {
+    //   return false;
+    // }
+    // return true;
   }
 
   @Post('/')
