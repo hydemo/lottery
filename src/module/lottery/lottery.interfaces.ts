@@ -11,4 +11,5 @@ export interface ILottery extends Document {
   readonly exchange: boolean;
   // 兑换时间
   readonly exchangeTime: Date;
+  readonly createdAt: Date;
 }

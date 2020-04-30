@@ -1,6 +1,9 @@
 import { Model } from 'mongoose';
 import { Inject, Injectable } from '@nestjs/common';
 import * as moment from 'moment';
+import * as uuid from 'uuid';
+import * as fs from 'fs';
+import * as XLSX from 'xlsx';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { PaginationUtil } from 'src/utils/pagination.util';
 import { IList } from 'src/common/interface/list.interface';
@@ -10,6 +13,274 @@ import { RedisService } from 'nestjs-redis';
 import { ApiException } from 'src/common/expection/api.exception';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { UserService } from '../user/user.service';
+
+const data = [
+  {
+    count: 280,
+    image: 'https://gw.alicdn.com/tfs/TB1yNoyXicKOu4jSZKbXXc19XXa-481-481.png',
+  },
+  {
+    count: 177,
+    image: 'https://gw.alicdn.com/tfs/TB1UeRnfIKfxu4jSZPfXXb3dXXa-481-481.png',
+  },
+  {
+    count: 120,
+    image: 'https://gw.alicdn.com/tfs/TB1YrYoD4D1gK0jSZFyXXciOVXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1CDbiD7L0gK0jSZFtXXXQCXXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1xfYkDYr1gK0jSZFDXXb9yVXa-481-481.png',
+  },
+  {
+    count: 90,
+    image: 'https://gw.alicdn.com/tfs/TB13fzbD1L2gK0jSZPhXXahvXXa-481-481.png',
+  },
+  {
+    count: 4,
+    image: 'https://gw.alicdn.com/tfs/TB1ZDYkD7L0gK0jSZFAXXcA9pXa-481-481.png',
+  },
+  {
+    count: 1,
+    image: 'https://gw.alicdn.com/tfs/TB1hAHnDYY1gK0jSZTEXXXDQVXa-481-481.png',
+  },
+  {
+    count: 51,
+    image: 'https://gw.alicdn.com/tfs/TB1kRLlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
+  },
+  {
+    count: 20,
+    image: 'https://gw.alicdn.com/tfs/TB1ElDlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
+  },
+  {
+    count: 11,
+    image: 'https://gw.alicdn.com/tfs/TB1HuLmD7L0gK0jSZFxXXXWHVXa-481-481.png',
+  },
+  {
+    count: 100,
+    image: 'https://gw.alicdn.com/tfs/TB15gDjDVP7gK0jSZFjXXc5aXXa-481-481.png',
+  },
+  {
+    count: 100,
+    image: 'https://gw.alicdn.com/tfs/TB1WnDoDW61gK0jSZFlXXXDKFXa-481-481.png',
+  },
+  {
+    count: 2000,
+    image: 'https://gw.alicdn.com/tfs/TB1ElLlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
+  },
+  {
+    count: 500,
+    image: 'https://gw.alicdn.com/tfs/TB1x_6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
+  },
+  {
+    count: 500,
+    image: 'https://gw.alicdn.com/tfs/TB1RY2kDYr1gK0jSZR0XXbP8XXa-481-481.png',
+  },
+  {
+    count: 250,
+    image: 'https://gw.alicdn.com/tfs/TB1xTYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
+  },
+  {
+    count: 200,
+    image: 'https://gw.alicdn.com/tfs/TB1PHvnD4v1gK0jSZFFXXb0sXXa-481-481.png',
+  },
+  {
+    count: 700,
+    image: 'https://gw.alicdn.com/tfs/TB1lTLoDW61gK0jSZFlXXXDKFXa-481-481.png',
+  },
+  {
+    count: 700,
+    image: 'https://gw.alicdn.com/tfs/TB1wn6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
+  },
+  {
+    count: 491,
+    image: 'https://gw.alicdn.com/tfs/TB1746nD.Y1gK0jSZFCXXcwqXXa-481-481.png',
+  },
+  {
+    count: 291,
+    image: 'https://gw.alicdn.com/tfs/TB1b26kDYr1gK0jSZFDXXb9yVXa-481-481.png',
+  },
+  {
+    count: 391,
+    image: 'https://gw.alicdn.com/tfs/TB16bDnD4v1gK0jSZFFXXb0sXXa-481-481.png',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB1refjD4z1gK0jSZSgXXavwpXa-481-481.png',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB1lY2oD4D1gK0jSZFyXXciOVXa-481-481.png',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB13nYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
+  },
+  {
+    count: 2000,
+    image: 'https://gw.alicdn.com/tfs/TB1Q9TfDWL7gK0jSZFBXXXZZpXa-481-481.png',
+  },
+  {
+    count: 2000,
+    image: 'https://gw.alicdn.com/tfs/TB1i1flD1H2gK0jSZFEXXcqMpXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1k0_lD1H2gK0jSZFEXXcqMpXa-481-481.png',
+  },
+  {
+    count: 80,
+    image: 'https://gw.alicdn.com/tfs/TB1SFLjD4D1gK0jSZFsXXbldVXa-481-481.png',
+  },
+  {
+    count: 600,
+    image: 'https://gw.alicdn.com/tfs/TB1o4_nD7T2gK0jSZPcXXcKkpXa-481-481.png',
+  },
+  {
+    count: 591,
+    image: 'https://gw.alicdn.com/tfs/TB1jmrjD4n1gK0jSZKPXXXvUXXa-481-481.png',
+  },
+  {
+    count: 60,
+    image: 'https://gw.alicdn.com/tfs/TB1p2vbD1L2gK0jSZPhXXahvXXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1XrznD4v1gK0jSZFFXXb0sXXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1fN2nD.Y1gK0jSZFCXXcwqXXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1irToD4D1gK0jSZFyXXciOVXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB17hgyXicKOu4jSZKbXXc19XXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1E1blD1H2gK0jSZFEXXcqMpXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1abznD4v1gK0jSZFFXXb0sXXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB1SWbnD4D1gK0jSZFKXXcJrVXa-481-481.png',
+  },
+  {
+    count: 80,
+    image: 'https://gw.alicdn.com/tfs/TB1ExgyXicKOu4jSZKbXXc19XXa-481-481.png',
+  },
+  {
+    count: 15,
+    image: 'https://gw.alicdn.com/tfs/TB1TCLfDWL7gK0jSZFBXXXZZpXa-481-481.png',
+  },
+  {
+    count: 20,
+    image: 'https://gw.alicdn.com/tfs/TB1k6HkD9f2gK0jSZFPXXXsopXa-481-481.png',
+  },
+  {
+    count: 394,
+    image: 'https://gw.alicdn.com/tfs/TB1rn6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB1OFPjD4D1gK0jSZFsXXbldVXa-481-481.png',
+  },
+  {
+    count: 250,
+    image: 'https://gw.alicdn.com/tfs/TB14_YnDYj1gK0jSZFOXXc7GpXa-481-481.png',
+  },
+  {
+    count: 791,
+    image: 'https://gw.alicdn.com/tfs/TB1dCrjD4n1gK0jSZKPXXXvUXXa-481-481.png',
+  },
+  {
+    count: 800,
+    image: 'https://gw.alicdn.com/tfs/TB1fnjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
+  },
+  {
+    count: 160,
+    image: 'https://gw.alicdn.com/tfs/TB1vTYkD7L0gK0jSZFAXXcA9pXa-481-481.png',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB1zDYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
+  },
+  {
+    count: 300,
+    image: 'https://gw.alicdn.com/tfs/TB17zHiDVT7gK0jSZFpXXaTkpXa-481-481.png',
+  },
+  {
+    count: 150,
+    image: 'https://gw.alicdn.com/tfs/TB1PhYnD.Y1gK0jSZFCXXcwqXXa-481-481.png',
+  },
+  {
+    count: 150,
+    image: 'https://gw.alicdn.com/tfs/TB1b42nD7T2gK0jSZPcXXcKkpXa-481-481.png',
+  },
+  {
+    count: 150,
+    image: 'https://gw.alicdn.com/tfs/TB1FaYiDVY7gK0jSZKzXXaikpXa-481-481.png',
+  },
+  {
+    count: 300,
+    image: 'https://gw.alicdn.com/tfs/TB1_9_iD7L0gK0jSZFtXXXQCXXa-481-481.png',
+  },
+  {
+    count: 300,
+    image: 'https://gw.alicdn.com/tfs/TB1QCLfDWL7gK0jSZFBXXXZZpXa-481-481.png',
+  },
+  {
+    count: 250,
+    image: 'https://gw.alicdn.com/tfs/TB1v8DlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
+  },
+  {
+    count: 20,
+    image: 'https://gw.alicdn.com/tfs/TB1iQHnDYY1gK0jSZTEXXXDQVXa-481-481.png',
+  },
+  {
+    count: 30,
+    image: 'https://gw.alicdn.com/tfs/TB1i_PjD7P2gK0jSZPxXXacQpXa-481-481.png',
+  },
+  {
+    count: 80,
+    image: 'https://gw.alicdn.com/tfs/TB1ZnjoD1H2gK0jSZJnXXaT1FXa-481-481.png',
+  },
+  {
+    count: 6000,
+    image: 'https://gw.alicdn.com/tfs/TB10nLoDW61gK0jSZFlXXXDKFXa-481-481.png',
+  },
+  {
+    count: 40,
+    image: 'https://gw.alicdn.com/tfs/TB17GbnD4D1gK0jSZFKXXcJrVXa-481-481.png',
+  },
+  {
+    count: 2491,
+    image: 'https://gw.alicdn.com/tfs/TB1v2jiD2b2gK0jSZK9XXaEgFXa-481-481.jpg',
+  },
+  {
+    count: 400,
+    image: 'https://gw.alicdn.com/tfs/TB1MTjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
+  },
+  {
+    count: 2000,
+    image: 'https://gw.alicdn.com/tfs/TB1KTjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
+  },
+  // {
+  //   count: 3,
+  //   image:
+  //     'https://gw.alicdn.com/tfs/TB1SgLiD2b2gK0jSZK9XXaEgFXa-2651-1761.jpg',
+  // },
+];
 
 @Injectable()
 export class LotteryService {
@@ -186,338 +457,6 @@ export class LotteryService {
   }
 
   async genLottery() {
-    const data = [
-      {
-        count: 280,
-        image:
-          'https://gw.alicdn.com/tfs/TB1yNoyXicKOu4jSZKbXXc19XXa-481-481.png',
-      },
-      {
-        count: 177,
-        image:
-          'https://gw.alicdn.com/tfs/TB1UeRnfIKfxu4jSZPfXXb3dXXa-481-481.png',
-      },
-      {
-        count: 120,
-        image:
-          'https://gw.alicdn.com/tfs/TB1YrYoD4D1gK0jSZFyXXciOVXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1CDbiD7L0gK0jSZFtXXXQCXXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1xfYkDYr1gK0jSZFDXXb9yVXa-481-481.png',
-      },
-      {
-        count: 90,
-        image:
-          'https://gw.alicdn.com/tfs/TB13fzbD1L2gK0jSZPhXXahvXXa-481-481.png',
-      },
-      {
-        count: 4,
-        image:
-          'https://gw.alicdn.com/tfs/TB1ZDYkD7L0gK0jSZFAXXcA9pXa-481-481.png',
-      },
-      {
-        count: 1,
-        image:
-          'https://gw.alicdn.com/tfs/TB1hAHnDYY1gK0jSZTEXXXDQVXa-481-481.png',
-      },
-      {
-        count: 51,
-        image:
-          'https://gw.alicdn.com/tfs/TB1kRLlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
-      },
-      {
-        count: 20,
-        image:
-          'https://gw.alicdn.com/tfs/TB1ElDlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
-      },
-      {
-        count: 11,
-        image:
-          'https://gw.alicdn.com/tfs/TB1HuLmD7L0gK0jSZFxXXXWHVXa-481-481.png',
-      },
-      {
-        count: 100,
-        image:
-          'https://gw.alicdn.com/tfs/TB15gDjDVP7gK0jSZFjXXc5aXXa-481-481.png',
-      },
-      {
-        count: 100,
-        image:
-          'https://gw.alicdn.com/tfs/TB1WnDoDW61gK0jSZFlXXXDKFXa-481-481.png',
-      },
-      {
-        count: 2000,
-        image:
-          'https://gw.alicdn.com/tfs/TB1ElLlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
-      },
-      {
-        count: 500,
-        image:
-          'https://gw.alicdn.com/tfs/TB1x_6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
-      },
-      {
-        count: 500,
-        image:
-          'https://gw.alicdn.com/tfs/TB1RY2kDYr1gK0jSZR0XXbP8XXa-481-481.png',
-      },
-      {
-        count: 250,
-        image:
-          'https://gw.alicdn.com/tfs/TB1xTYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
-      },
-      {
-        count: 200,
-        image:
-          'https://gw.alicdn.com/tfs/TB1PHvnD4v1gK0jSZFFXXb0sXXa-481-481.png',
-      },
-      {
-        count: 700,
-        image:
-          'https://gw.alicdn.com/tfs/TB1lTLoDW61gK0jSZFlXXXDKFXa-481-481.png',
-      },
-      {
-        count: 700,
-        image:
-          'https://gw.alicdn.com/tfs/TB1wn6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
-      },
-      {
-        count: 491,
-        image:
-          'https://gw.alicdn.com/tfs/TB1746nD.Y1gK0jSZFCXXcwqXXa-481-481.png',
-      },
-      {
-        count: 291,
-        image:
-          'https://gw.alicdn.com/tfs/TB1b26kDYr1gK0jSZFDXXb9yVXa-481-481.png',
-      },
-      {
-        count: 391,
-        image:
-          'https://gw.alicdn.com/tfs/TB16bDnD4v1gK0jSZFFXXb0sXXa-481-481.png',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB1refjD4z1gK0jSZSgXXavwpXa-481-481.png',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB1lY2oD4D1gK0jSZFyXXciOVXa-481-481.png',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB13nYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
-      },
-      {
-        count: 2000,
-        image:
-          'https://gw.alicdn.com/tfs/TB1Q9TfDWL7gK0jSZFBXXXZZpXa-481-481.png',
-      },
-      {
-        count: 2000,
-        image:
-          'https://gw.alicdn.com/tfs/TB1i1flD1H2gK0jSZFEXXcqMpXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1k0_lD1H2gK0jSZFEXXcqMpXa-481-481.png',
-      },
-      {
-        count: 80,
-        image:
-          'https://gw.alicdn.com/tfs/TB1SFLjD4D1gK0jSZFsXXbldVXa-481-481.png',
-      },
-      {
-        count: 600,
-        image:
-          'https://gw.alicdn.com/tfs/TB1o4_nD7T2gK0jSZPcXXcKkpXa-481-481.png',
-      },
-      {
-        count: 591,
-        image:
-          'https://gw.alicdn.com/tfs/TB1jmrjD4n1gK0jSZKPXXXvUXXa-481-481.png',
-      },
-      {
-        count: 60,
-        image:
-          'https://gw.alicdn.com/tfs/TB1p2vbD1L2gK0jSZPhXXahvXXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1XrznD4v1gK0jSZFFXXb0sXXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1fN2nD.Y1gK0jSZFCXXcwqXXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1irToD4D1gK0jSZFyXXciOVXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB17hgyXicKOu4jSZKbXXc19XXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1E1blD1H2gK0jSZFEXXcqMpXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1abznD4v1gK0jSZFFXXb0sXXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB1SWbnD4D1gK0jSZFKXXcJrVXa-481-481.png',
-      },
-      {
-        count: 80,
-        image:
-          'https://gw.alicdn.com/tfs/TB1ExgyXicKOu4jSZKbXXc19XXa-481-481.png',
-      },
-      {
-        count: 15,
-        image:
-          'https://gw.alicdn.com/tfs/TB1TCLfDWL7gK0jSZFBXXXZZpXa-481-481.png',
-      },
-      {
-        count: 20,
-        image:
-          'https://gw.alicdn.com/tfs/TB1k6HkD9f2gK0jSZFPXXXsopXa-481-481.png',
-      },
-      {
-        count: 394,
-        image:
-          'https://gw.alicdn.com/tfs/TB1rn6kD7L0gK0jSZFAXXcA9pXa-481-481.png',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB1OFPjD4D1gK0jSZFsXXbldVXa-481-481.png',
-      },
-      {
-        count: 250,
-        image:
-          'https://gw.alicdn.com/tfs/TB14_YnDYj1gK0jSZFOXXc7GpXa-481-481.png',
-      },
-      {
-        count: 791,
-        image:
-          'https://gw.alicdn.com/tfs/TB1dCrjD4n1gK0jSZKPXXXvUXXa-481-481.png',
-      },
-      {
-        count: 800,
-        image:
-          'https://gw.alicdn.com/tfs/TB1fnjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
-      },
-      {
-        count: 160,
-        image:
-          'https://gw.alicdn.com/tfs/TB1vTYkD7L0gK0jSZFAXXcA9pXa-481-481.png',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB1zDYnDYj1gK0jSZFOXXc7GpXa-481-481.png',
-      },
-      {
-        count: 300,
-        image:
-          'https://gw.alicdn.com/tfs/TB17zHiDVT7gK0jSZFpXXaTkpXa-481-481.png',
-      },
-      {
-        count: 150,
-        image:
-          'https://gw.alicdn.com/tfs/TB1PhYnD.Y1gK0jSZFCXXcwqXXa-481-481.png',
-      },
-      {
-        count: 150,
-        image:
-          'https://gw.alicdn.com/tfs/TB1b42nD7T2gK0jSZPcXXcKkpXa-481-481.png',
-      },
-      {
-        count: 150,
-        image:
-          'https://gw.alicdn.com/tfs/TB1FaYiDVY7gK0jSZKzXXaikpXa-481-481.png',
-      },
-      {
-        count: 300,
-        image:
-          'https://gw.alicdn.com/tfs/TB1_9_iD7L0gK0jSZFtXXXQCXXa-481-481.png',
-      },
-      {
-        count: 300,
-        image:
-          'https://gw.alicdn.com/tfs/TB1QCLfDWL7gK0jSZFBXXXZZpXa-481-481.png',
-      },
-      {
-        count: 250,
-        image:
-          'https://gw.alicdn.com/tfs/TB1v8DlD7Y2gK0jSZFgXXc5OFXa-481-481.png',
-      },
-      {
-        count: 20,
-        image:
-          'https://gw.alicdn.com/tfs/TB1iQHnDYY1gK0jSZTEXXXDQVXa-481-481.png',
-      },
-      {
-        count: 30,
-        image:
-          'https://gw.alicdn.com/tfs/TB1i_PjD7P2gK0jSZPxXXacQpXa-481-481.png',
-      },
-      {
-        count: 80,
-        image:
-          'https://gw.alicdn.com/tfs/TB1ZnjoD1H2gK0jSZJnXXaT1FXa-481-481.png',
-      },
-      {
-        count: 6000,
-        image:
-          'https://gw.alicdn.com/tfs/TB10nLoDW61gK0jSZFlXXXDKFXa-481-481.png',
-      },
-      {
-        count: 40,
-        image:
-          'https://gw.alicdn.com/tfs/TB17GbnD4D1gK0jSZFKXXcJrVXa-481-481.png',
-      },
-      {
-        count: 2491,
-        image:
-          'https://gw.alicdn.com/tfs/TB1v2jiD2b2gK0jSZK9XXaEgFXa-481-481.jpg',
-      },
-      {
-        count: 400,
-        image:
-          'https://gw.alicdn.com/tfs/TB1MTjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
-      },
-      {
-        count: 2000,
-        image:
-          'https://gw.alicdn.com/tfs/TB1KTjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
-      },
-      // {
-      //   count: 3,
-      //   image:
-      //     'https://gw.alicdn.com/tfs/TB1SgLiD2b2gK0jSZK9XXaEgFXa-2651-1761.jpg',
-      // },
-    ];
     const client = this.redis.getClient();
     const rewards: any = [];
     const codes: string[] = [];
@@ -538,5 +477,50 @@ export class LotteryService {
     for (let i = 0; i < newRewards.length; i++) {
       await client.rpush('reward', JSON.stringify(newRewards[i]));
     }
+  }
+
+  // 下载
+  async download(path: string) {
+    const filename = `${uuid()}.xlsx`;
+    const pathExist = fs.existsSync(path);
+    if (!pathExist) {
+      fs.mkdirSync(path);
+    }
+    const condition: any = {};
+    // if (reward) {
+    //   condition.reward = reward;
+    // }
+    const lotterys: ILottery[] = await this.lotteryModel
+      .find(condition)
+      .sort({ createdAted: -1 })
+      .lean()
+      .exec();
+    const list: any = [];
+    for (const lottery of lotterys) {
+      const lotteryData = {
+        用户ID: String(lottery.user),
+        兑换码: lottery.code,
+        券名: data[lottery.reward - 1] ? data[lottery.reward - 1].count : '',
+        领用时间: moment(lottery.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+        是否使用: lottery.exchange ? '是' : '否',
+        使用时间: lottery.exchangeTime
+          ? moment(lottery.exchangeTime).format('YYYY-MM-DD HH:mm:ss')
+          : '',
+      };
+      list.push(lotteryData);
+    }
+    const wch: any = [];
+    for (let w = 0; w < 7; w++) {
+      wch.push({ wch: 25 });
+    }
+
+    const sheet = XLSX.utils.json_to_sheet(list);
+    sheet['!cols'] = wch;
+    const workbook = {
+      SheetNames: ['领券总表'],
+      Sheets: { 领券总表: sheet },
+    };
+    XLSX.writeFile(workbook, `${path}/${filename}`);
+    return filename;
   }
 }
