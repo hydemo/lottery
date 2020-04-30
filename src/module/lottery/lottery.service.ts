@@ -458,9 +458,9 @@ export class LotteryService {
     if (now > '12:21:44') {
       return 'null';
     }
-    // if (now < '12:12:00') {
-    //   return 'noStart';
-    // }
+    if (now < '12:12:00') {
+      return 'noStart';
+    }
     const client = this.redis.getClient();
 
     const lua =
