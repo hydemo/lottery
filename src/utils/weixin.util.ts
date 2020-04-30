@@ -30,7 +30,8 @@ export class WeixinUtil {
       },
     });
     if (result && result.data && result.data.access_token) {
-      return await this.userinfo(result.data);
+      // return await this.userinfo(result.data);
+      return result.data.openid;
     }
     return null;
   }

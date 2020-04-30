@@ -512,18 +512,18 @@ export class LotteryService {
         image:
           'https://gw.alicdn.com/tfs/TB1KTjiD7L0gK0jSZFtXXXQCXXa-481-481.png',
       },
-      {
-        count: 3,
-        image:
-          'https://gw.alicdn.com/tfs/TB1SgLiD2b2gK0jSZK9XXaEgFXa-2651-1761.jpg',
-      },
+      // {
+      //   count: 3,
+      //   image:
+      //     'https://gw.alicdn.com/tfs/TB1SgLiD2b2gK0jSZK9XXaEgFXa-2651-1761.jpg',
+      // },
     ];
     const client = this.redis.getClient();
     const rewards: any = [];
     const codes: string[] = [];
     for (let i = 0; i < data.length; i++) {
       const lottery = data[i];
-      for (let j = 0; j < lottery.count; j++) {
+      for (let j = 0; j < 2; j++) {
         const code = this.genCode(codes);
         codes.push(code);
         rewards.push({
@@ -531,7 +531,7 @@ export class LotteryService {
           code,
         });
       }
-      await client.hset('lottery', String(i + 1), lottery.count);
+      await client.hset('lottery', String(i + 1), 2);
     }
     const newRewards = this.shuffle(rewards);
     // tslint:disable-next-line: prefer-for-of

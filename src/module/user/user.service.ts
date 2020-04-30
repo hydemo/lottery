@@ -51,13 +51,13 @@ export class UserService {
 
   async loginByWeixin(login: LoginDTO, ip: string): Promise<any> {
     // 解释用户数据
-    const userinfo = await this.weixinUtil.oauth(login.code);
-    if (!userinfo) {
+    const openid = await this.weixinUtil.oauth(login.code);
+    if (!openid) {
       throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
     }
     // 根据openid查找用户是否已经注册
     let user: IUser = await this.userModel
-      .findOne({ weixinOpenid: userinfo.openid })
+      .findOne({ weixinOpenid: openid })
       .lean()
       .exec();
     if (!user) {
@@ -65,9 +65,9 @@ export class UserService {
       user = await this.userModel.create({
         registerTime: Date.now(),
         registerIp: ip,
-        nickname: userinfo.nickname,
-        avatar: userinfo.headimgurl,
-        weixinOpenid: userinfo.openid,
+        // nickname: userinfo.nickname,
+        // avatar: userinfo.headimgurl,
+        weixinOpenid: openid,
       });
     }
     // 更新登录信息
