@@ -152,7 +152,7 @@ export class LotteryService {
       .limit(pagination.pageSize)
       .skip((pagination.current - 1) * pagination.pageSize)
       .sort({ createdAt: -1 })
-      .populate({ path: 'user', model: 'user', select: '_id nickname avatar' })
+      // .populate({ path: 'user', model: 'user', select: '_id nickname avatar' })
       .lean()
       .exec();
     const total = await this.lotteryModel.countDocuments(condition);
