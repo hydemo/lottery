@@ -41,16 +41,15 @@ export class ApiLotteryController {
   })
   @ApiOperation({ title: '判断是否抽过奖', description: '判断是否抽过奖' })
   async check(@Request() req: any): Promise<any> {
+    if (!req.user.signTime) {
+      return true;
+    }
+    const now = moment().format('YYYY-MM-DD');
+    const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
+    if (now === lotteryTime) {
+      return false;
+    }
     return true;
-    // if (!req.user.signTime) {
-    //   return true;
-    // }
-    // const now = moment().format('YYYY-MM-DD');
-    // const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
-    // if (now === lotteryTime) {
-    //   return false;
-    // }
-    // return true;
   }
 
   @Post('/')
@@ -59,13 +58,13 @@ export class ApiLotteryController {
   })
   @ApiOperation({ title: '抽奖', description: '抽奖' })
   async lottery(@Request() req: any): Promise<any> {
-    // const now = moment().format('YYYY-MM-DD');
-    // if (req.user.signTime) {
-    //   const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
-    //   if (now === lotteryTime) {
-    //     return 'exist';
-    //   }
-    // }
+    const now = moment().format('YYYY-MM-DD');
+    if (req.user.signTime) {
+      const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
+      if (now === lotteryTime) {
+        return 'exist';
+      }
+    }
     return await this.lotteryService.lottery(req.user._id);
   }
 
