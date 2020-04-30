@@ -589,7 +589,7 @@ export class LotteryService {
       const lotteryData = {
         用户ID: String(lottery.user),
         兑换码: lottery.code,
-        券名: data[lottery.reward - 1] ? data[lottery.reward - 1].count : '',
+        券名: data[lottery.reward - 1] ? data[lottery.reward - 1].name : '',
         领用时间: moment(lottery.createdAt).format('YYYY-MM-DD HH:mm:ss'),
         是否使用: lottery.exchange ? '是' : '否',
         使用时间: lottery.exchangeTime
