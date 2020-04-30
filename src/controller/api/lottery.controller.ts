@@ -59,13 +59,22 @@ export class ApiLotteryController {
   @ApiOperation({ title: '抽奖', description: '抽奖' })
   async lottery(@Request() req: any): Promise<any> {
     const now = moment().format('YYYY-MM-DD');
+    let time = 1;
     if (req.user.signTime) {
       const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
       if (now === lotteryTime) {
         return 'exist';
       }
     }
-    return await this.lotteryService.lottery(req.user._id);
+    if (req.user.firstSignTime) {
+      const FirstLotteryTime = moment(req.user.firstSignTime).format(
+        'YYYY-MM-DD',
+      );
+      if (now === FirstLotteryTime) {
+        time = 2;
+      }
+    }
+    return await this.lotteryService.lottery(req.user._id, time);
   }
 
   @Get('/me')

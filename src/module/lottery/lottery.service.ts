@@ -453,11 +453,14 @@ export class LotteryService {
   }
 
   // 生产抽奖结果
-  async lottery(user: string) {
+  async lottery(user: string, time: number) {
     const now = moment().format('HH:mm:ss');
-    if (now > '12:42:00') {
+    if (now > '12:21:44') {
       return 'null';
     }
+    // if (now < '12:12:00') {
+    //   return 'noStart';
+    // }
     const client = this.redis.getClient();
 
     const lua =
@@ -496,7 +499,11 @@ export class LotteryService {
       reward: lottery.reward,
       user,
     };
-    await this.userService.updateById(user, { signTime: Date.now() });
+    if (time === 2) {
+      await this.userService.updateById(user, { signTime: Date.now() });
+    } else {
+      await this.userService.updateById(user, { firstSignTime: Date.now() });
+    }
     return await this.lotteryModel.create(newLottery);
   }
 

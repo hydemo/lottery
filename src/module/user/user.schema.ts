@@ -29,6 +29,7 @@ export const UserSchema = new mongoose.Schema(
     isBlock: { type: Boolean, default: false },
     // 签到时间
     signTime: Date,
+    firstSignTime: Date,
   },
   { collection: 'user', versionKey: false, timestamps: true },
 );
