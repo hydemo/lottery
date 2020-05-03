@@ -13,7 +13,7 @@ export class InitService {
   ) {}
 
   async init() {
-    // await this.loteryService.genLottery();
+    await this.loteryService.reset();
     const adminExist = await this.adminService.findOne({ role: 0 });
     if (!adminExist) {
       const admin: CreateAdminDTO = {

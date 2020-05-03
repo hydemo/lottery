@@ -23,4 +23,7 @@ export class CreateLotteryDTO {
   @Type(() => Number)
   @ApiModelProperty({ description: '奖品' })
   readonly reward: number;
+
+  readonly cache?: boolean;
+  readonly createdAt?: any;
 }

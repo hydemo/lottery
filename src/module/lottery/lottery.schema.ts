@@ -5,7 +5,7 @@ const ObjectId = mongoose.Types.ObjectId;
 export const LotterySchema = new mongoose.Schema(
   {
     // 兑换码
-    code: { type: String },
+    code: { type: String, unique: true },
     // 用户
     user: { type: ObjectId },
     // 奖品
@@ -26,6 +26,8 @@ export const LotterySchema = new mongoose.Schema(
     createBy: { type: ObjectId },
     // 日期
     date: { type: String },
+
+    cache: { type: Boolean },
   },
   { collection: 'lottery', versionKey: false, timestamps: true },
 );
