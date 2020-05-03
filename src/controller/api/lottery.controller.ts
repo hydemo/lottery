@@ -21,7 +21,7 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 @ApiUseTags('api/lottery')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard())
+// @UseGuards(AuthGuard())
 @Controller('api/lotterys')
 export class ApiLotteryController {
   constructor(private lotteryService: LotteryService) {}
@@ -58,23 +58,7 @@ export class ApiLotteryController {
   })
   @ApiOperation({ title: '抽奖', description: '抽奖' })
   async lottery(@Request() req: any): Promise<any> {
-    const now = moment().format('YYYY-MM-DD');
-    let time = 1;
-    if (req.user.signTime) {
-      const lotteryTime = moment(req.user.signTime).format('YYYY-MM-DD');
-      if (now === lotteryTime) {
-        return 'exist';
-      }
-    }
-    if (req.user.firstSignTime) {
-      const FirstLotteryTime = moment(req.user.firstSignTime).format(
-        'YYYY-MM-DD',
-      );
-      if (now === FirstLotteryTime) {
-        time = 2;
-      }
-    }
-    return await this.lotteryService.lottery(req.user._id, time);
+    return await this.lotteryService.lottery('5eae865dd30f636c7f7d1538');
   }
 
   @Get('/me')
@@ -83,7 +67,7 @@ export class ApiLotteryController {
   })
   @ApiOperation({ title: '我的奖品', description: '我的奖品' })
   async me(@Request() req: any): Promise<any> {
-    return await this.lotteryService.listByUser(req.user._id);
+    return await this.lotteryService.listByUser('5eae865dd30f636c7f7d1538');
   }
 
   @Put('/:id')
@@ -95,6 +79,6 @@ export class ApiLotteryController {
     @Request() req: any,
     @Param('id', new MongodIdPipe()) id: string,
   ): Promise<any> {
-    return await this.lotteryService.exchange(req.user._id, id);
+    return await this.lotteryService.exchange('5eae865dd30f636c7f7d1538', id);
   }
 }
