@@ -734,12 +734,12 @@ export class LotteryService {
 
   // 生产抽奖结果
   async lottery(user: string) {
-    // if (moment().format('YYYY-MM-DD HH:mm:ss') < '2020-05-04 12:12:00') {
-    //   return 'noStart';
-    // }
-    // if (moment().format('YYYY-MM-DD HH:mm:ss') > '2020-05-04 12:26:51') {
-    //   return 'null';
-    // }
+    if (moment().format('YYYY-MM-DD HH:mm:ss') < '2020-05-04 12:12:00') {
+      return 'noStart';
+    }
+    if (moment().format('YYYY-MM-DD HH:mm:ss') > '2020-05-04 12:26:51') {
+      return 'null';
+    }
 
     const client = this.redis.getClient();
     const lua =
