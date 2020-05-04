@@ -737,7 +737,7 @@ export class LotteryService {
     if (moment().format('YYYY-MM-DD HH:mm:ss') < '2020-05-04 12:12:00') {
       return 'noStart';
     }
-    if (moment().format('YYYY-MM-DD HH:mm:ss') > '2020-05-04 12:26:51') {
+    if (moment().format('YYYY-MM-DD HH:mm:ss') > '2020-05-04 12:36:51') {
       return 'null';
     }
 
