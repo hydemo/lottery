@@ -2,7 +2,6 @@ import * as md5 from 'md5';
 import { Injectable } from '@nestjs/common';
 import { CreateAdminDTO } from 'src/module/admin/admin.dto';
 import { AdminService } from 'src/module/admin/admin.service';
-import { RedisService } from 'nestjs-redis';
 import { LotteryService } from 'src/module/lottery/lottery.service';
 
 @Injectable()
@@ -13,7 +12,7 @@ export class InitService {
   ) {}
 
   async init() {
-    // await this.loteryService.genLottery();
+    // await this.loteryService.genUserLoggery();
     const adminExist = await this.adminService.findOne({ role: 0 });
     if (!adminExist) {
       const admin: CreateAdminDTO = {
